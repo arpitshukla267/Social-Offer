@@ -38,7 +38,7 @@ const Page = React.forwardRef((props, ref) => {
   
   return (
     <div 
-      className={`overflow-hidden relative bg-white transform-gpu ${isLeftPage ? 'rounded-l-2xl' : 'rounded-r-2xl'}`} 
+      className={`overflow-hidden relative bg-white transform-gpu`} 
       ref={ref} 
       style={{ 
         willChange: 'transform',
@@ -282,17 +282,17 @@ function LibraryContent() {
   }, [isBookReady, mounted, selectedIndex]);
 
   if (!mounted || !isBookReady) return (
-    <div className="fixed inset-0 z-[500] bg-transparent flex flex-col items-center justify-center">
+    <div className="fixed inset-0 z-[500] bg-zinc-950 flex flex-col items-center justify-center">
       {/* Cinematic Lighter Atmosphere for Loader */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-[100%] bg-[radial-gradient(45%_50%_at_50%_50%,rgba(220,38,38,0.03)_0%,transparent_100%)] rotate-12 transform-gpu" />
+        <div className="absolute -inset-[100%] bg-[radial-gradient(45%_50%_at_50%_50%,rgba(220,38,38,0.05)_0%,transparent_100%)] rotate-12 transform-gpu" />
       </div>
       
       <div className="relative z-10">
         <motion.h2 
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="text-4xl font-black uppercase tracking-tighter text-black"
+          className="text-4xl font-black uppercase tracking-tighter text-white"
         >
           SOCIAL <span className="text-red-600">OFFER.</span>
         </motion.h2>
@@ -314,8 +314,15 @@ function LibraryContent() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="h-screen w-full bg-zinc-100 text-zinc-900 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans"
+      className="h-screen w-full bg-zinc-950 text-zinc-100 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans relative"
     >
+      {/* Premium Gradient Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#18181b_0%,#09090b_100%)]" />
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-red-600/10 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] bg-red-900/10 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
+      </div>
       {/* Reels List */}
       {BOOKS.map((book, idx) => {
         // Condition: Load if it's the selected book, OR if selected book is ready, load next two
