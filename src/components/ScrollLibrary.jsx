@@ -89,7 +89,9 @@ const Page = React.forwardRef((props, ref) => {
 Page.displayName = "Page";
 
 const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad }) => {
+  const [currentPage, setCurrentPage] = useState(0);
   const currentPageRef = useRef(0);
+  const flipBookRef = useRef(null);
 
   if (!shouldLoad) {
     return (
