@@ -38,13 +38,9 @@ const Page = React.forwardRef((props, ref) => {
   
   return (
     <div 
-      className={`overflow-hidden relative transform-gpu`} 
+      className="overflow-hidden relative" 
       ref={ref} 
       style={{ 
-        willChange: 'transform',
-        transformStyle: 'preserve-3d',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
         backgroundColor: 'transparent'
       }}
     >
@@ -125,8 +121,8 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
       {/* BACKGROUND REMOVED FOR CLEANER LOOK */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none" />
       
-      {/* Interactive Book Container */}
-      <div className="relative w-full flex justify-center items-center h-[75vh] md:h-[80vh] z-10">
+      {/* Interactive Book Container - Forced Fixed Centering */}
+      <div className="relative w-full flex justify-center items-center h-[500px] md:h-[80vh] z-10">
         {!isMobile ? (
           <motion.div 
             animate={{ 
@@ -150,7 +146,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               usePortrait={false}
               onFlip={onFlip}
               drawShadow={false}
-              flippingTime={800}
+              flippingTime={1000}
               useMouseEvents={true}
               swipeDistance={30}
               showPageCorners={false}
@@ -172,27 +168,28 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               key={`${book.id}-mobile`}
               ref={flipBookRef}
               onInit={onInit}
-              width={windowDims.width - 40}
-              height={(windowDims.width - 40) * 1.4}
+              width={Math.floor(windowDims.width - 40)}
+              height={Math.floor((windowDims.width - 40) * 1.4)}
               size="fixed"
               minWidth={280}
               maxWidth={windowDims.width - 20}
               minHeight={400}
-              maxHeight={windowDims.height * 0.8}
-              showCover={true}
+              maxHeight={Math.floor(windowDims.height * 0.7)}
+              showCover={false} // Disabled for mobile portrait to prevent "spread" alignment jumps
               usePortrait={true}
               onFlip={onFlip}
               drawShadow={false}
-              flippingTime={800}
+              maxShadowOpacity={0}
+              flippingTime={1000}
               useMouseEvents={true}
-              swipeDistance={5}
+              swipeDistance={10}
               showPageCorners={false}
               disableFlipByClick={true}
               mobileScrollSupport={true}
               clickEventForward={false}
               startZIndex={0}
               style={{ margin: '0 auto', backgroundColor: 'transparent' }}
-              className=""
+              className="bg-transparent"
             >
               {book.pages.map((p, i) => (
                 <Page key={i} number={i + 1} image={p} />
@@ -318,40 +315,34 @@ function LibraryContent() {
         }
         /* Fix flickering during 3D transforms */
         .stf__parent {
-          perspective: 3000px !important;
-          backface-visibility: hidden !important;
-          -webkit-backface-visibility: hidden !important;
+          perspective: none !important; /* Disable manual perspective to let library handle it */
           touch-action: pan-y !important;
         }
         .stf__block {
-          backface-visibility: hidden !important;
-          -webkit-backface-visibility: hidden !important;
-          transform-style: preserve-3d !important;
-          background-color: transparent !important; /* Force transparent blocks */
+          background-color: transparent !important;
         }
         .stf__item {
           background-color: transparent !important;
-          backface-visibility: hidden !important;
-          -webkit-backface-visibility: hidden !important;
-          transform: translateZ(0); /* Final hardware push */
+        }
+        /* Aggressive jump prevention */
+        .stf__wrapper, .stf__parent, .stf__block, .stf__item {
+          background-color: transparent !important;
+          transition: none !important; /* Kill all transitions that cause layout jumping */
+        }
+        /* Specific positioning stabilization */
+        .stf__wrapper {
+          position: absolute !important;
+          top: 50% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
         }
         img {
           -webkit-user-drag: none;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
-          backface-visibility: hidden !important;
-          transform: translate3d(0,0,0);
         }
         canvas {
           display: none !important;
-        }
-        /* Anti-flash Fix */
-        .stf__wrapper {
-          background-color: transparent !important;
-        }
-        /* Force no transition during swap */
-        .stf__item * {
-           transition: none !important;
         }
         /* Prevent selection flickering */
         * {
