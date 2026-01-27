@@ -37,36 +37,34 @@ const Page = React.forwardRef((props, ref) => {
   const isLeftPage = props.number % 2 === 0;
   
   return (
-    <div className={`overflow-hidden relative bg-white transform-gpu ${isLeftPage ? 'rounded-l-2xl' : 'rounded-r-2xl'}`} ref={ref} style={{ willChange: 'transform' }}>
-      {/* CENTRAL SPINE ONLY - No outer borders */}
-      <div className={`absolute inset-y-0 w-[1.5px] z-[60] bg-black/10 
+    <div 
+      className={`overflow-hidden relative bg-white transform-gpu ${isLeftPage ? 'rounded-l-2xl' : 'rounded-r-2xl'}`} 
+      ref={ref} 
+      style={{ 
+        willChange: 'transform',
+        transformStyle: 'preserve-3d',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        backgroundColor: 'white'
+      }}
+    >
+      {/* SIMPLE SPINE INDICATOR */}
+      <div className={`absolute inset-y-0 w-[1px] z-[10] bg-black/5 
         ${isLeftPage ? 'right-0' : 'left-0'}`} 
+        style={{ transform: 'translateZ(1px)' }}
       />
 
-      {/* 3D SPINE SHADOW - Concentrated at the junction */}
-      <div className={`absolute inset-y-0 w-32 z-50 pointer-events-none 
+      {/* GRADIENT SHADOW - Simplified to 1 layer for stability */}
+      <div className={`absolute inset-y-0 w-24 z-[5] pointer-events-none 
         ${isLeftPage 
-          ? 'right-0 bg-gradient-to-l from-black/25 via-black/5 to-transparent' 
-          : 'left-0 bg-gradient-to-r from-black/25 via-black/5 to-transparent'
+          ? 'right-0 bg-gradient-to-l from-black/10 to-transparent' 
+          : 'left-0 bg-gradient-to-r from-black/10 to-transparent'
         }`} 
-      />
-      
-      {/* SHARP GUTTER SHADOW - For that tight crease look */}
-      <div className={`absolute inset-y-0 w-8 z-40 pointer-events-none 
-        ${isLeftPage 
-          ? 'right-0 bg-gradient-to-l from-black/20 to-transparent' 
-          : 'left-0 bg-gradient-to-r from-black/20 to-transparent'
-        }`} 
+        style={{ transform: 'translateZ(0.5px)' }}
       />
 
-      {/* GLOSSY PLASTIC REFLECTION */}
-      <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-tr from-transparent via-black/[0.01] to-black/[0.1]`} />
-        <div className={`absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-black/[0.05] via-transparent to-transparent rotate-12 transform-gpu`} />
-      </div>
-
-      {/* PAGE CONTENT - Simplified for performance */}
-      <div className="w-full h-full p-1">
+      {/* PAGE CONTENT */}
+      <div className="w-full h-full p-1" style={{ transform: 'translateZ(0px)' }}>
         <img 
           src={props.image} 
           alt={`Page ${props.number}`} 
@@ -75,12 +73,14 @@ const Page = React.forwardRef((props, ref) => {
         />
       </div>
       
-      {/* Refined Page Number UI */}
-      <div className={`absolute bottom-8 ${isLeftPage ? 'left-10' : 'right-10'} z-[70] flex items-center gap-2`}>
+      {/* Page Number */}
+      <div 
+        className={`absolute bottom-8 ${isLeftPage ? 'left-10' : 'right-10'} z-[15] flex items-center gap-2`}
+        style={{ transform: 'translateZ(2px)' }}
+      >
         <span className="text-[10px] font-black text-black/40 tracking-[0.2em]">
           {String(props.number).padStart(2, '0')}
         </span>
-        <div className="w-6 h-[1px] bg-red-600/30" />
       </div>
     </div>
   );
@@ -164,47 +164,79 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
       
       {/* Interactive Book - Now covering MAX screen */}
       <div className="relative w-full flex justify-center items-center h-[75vh] md:h-[80vh]">
-        <motion.div 
-          animate={{ 
-            // Cover (0): Center it (-25%)
-            // Last Page (Finished): Shift right (25%)
-            // Internal Spread: Center spread (0%)
-            x: isMobile ? "0%" : (currentPage === 0 ? "-25%" : (currentPage === book.pages.length - 1 ? "25%" : "0%"))
-          }}
-          transition={{ type: "spring", damping: 30, stiffness: 120 }}
-          className="relative"
-        >
-          <HTMLFlipBook
-            key={`${book.id}-${isMobile}`}
-            ref={flipBookRef}
-            onInit={onInit}
-            width={isMobile ? windowDims.width * 0.9 : 650}
-            height={isMobile ? windowDims.height * 0.75 : 880}
-            size="stretch"
-            minWidth={isMobile ? 300 : 450}
-            maxWidth={1400}
-            minHeight={isMobile ? 400 : 600}
-            maxHeight={1800}
-            showCover={true}
-            usePortrait={isMobile}
-            onFlip={onFlip}
-            drawShadow={false}
-            flippingTime={1000}
-            useMouseEvents={true}
-            swipeDistance={10}
-            showPageCorners={false}
-            disableFlipByClick={true}
-            mobileScrollSupport={true}
-            clickEventForward={false}
-            startZIndex={0}
-            style={{ backgroundColor: 'transparent' }}
-            className="shadow-2xl"
+        {!isMobile ? (
+          <motion.div 
+            animate={{ 
+              x: currentPage === 0 ? "-25%" : (currentPage === book.pages.length - 1 ? "25%" : "0%")
+            }}
+            transition={{ type: "spring", damping: 30, stiffness: 120 }}
+            className="relative"
           >
-            {book.pages.map((p, i) => (
-              <Page key={i} number={i + 1} image={p} />
-            ))}
-          </HTMLFlipBook>
-        </motion.div>
+            <HTMLFlipBook
+              key={`${book.id}-${isMobile}`}
+              ref={flipBookRef}
+              onInit={onInit}
+              width={650}
+              height={880}
+              size="stretch"
+              minWidth={450}
+              maxWidth={1400}
+              minHeight={600}
+              maxHeight={1800}
+              showCover={true}
+              usePortrait={false}
+              onFlip={onFlip}
+              drawShadow={false}
+              flippingTime={800}
+              useMouseEvents={true}
+              swipeDistance={30}
+              showPageCorners={false}
+              disableFlipByClick={true}
+              mobileScrollSupport={true}
+              clickEventForward={false}
+              startZIndex={0}
+              style={{ backgroundColor: 'white' }}
+              className="shadow-2xl"
+            >
+              {book.pages.map((p, i) => (
+                <Page key={i} number={i + 1} image={p} />
+              ))}
+            </HTMLFlipBook>
+          </motion.div>
+        ) : (
+          <div className="relative">
+            <HTMLFlipBook
+              key={`${book.id}-mobile`}
+              ref={flipBookRef}
+              onInit={onInit}
+              width={380}
+              height={550}
+              size="stretch"
+              minWidth={300}
+              maxWidth={1400}
+              minHeight={400}
+              maxHeight={1800}
+              showCover={true}
+              usePortrait={true}
+              onFlip={onFlip}
+              drawShadow={false}
+              flippingTime={800}
+              useMouseEvents={true}
+              swipeDistance={5}
+              showPageCorners={false}
+              disableFlipByClick={true}
+              mobileScrollSupport={true}
+              clickEventForward={false}
+              startZIndex={0}
+              style={{ backgroundColor: 'white' }}
+              className="shadow-2xl"
+            >
+              {book.pages.map((p, i) => (
+                <Page key={i} number={i + 1} image={p} />
+              ))}
+            </HTMLFlipBook>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -320,26 +352,35 @@ function LibraryContent() {
           perspective: 3000px !important;
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
-          touch-action: none !important;
+          touch-action: pan-y !important;
+          background-color: transparent !important;
         }
         .stf__block {
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
           transform-style: preserve-3d !important;
           will-change: transform;
+          background-color: white !important; /* Ensure solid blocks */
         }
         .stf__item {
-          background-color: transparent !important;
-          box-shadow: none !important;
+          background-color: white !important;
+          backface-visibility: hidden !important;
+          -webkit-backface-visibility: hidden !important;
         }
         img {
           -webkit-user-drag: none;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
-          backface-visibility: hidden;
+          backface-visibility: hidden !important;
+          transform: translateZ(0); /* Force layering */
         }
         canvas {
           display: none !important;
+        }
+        /* Prevent selection flickering */
+        * {
+          -webkit-user-select: none;
+          -webkit-touch-callout: none;
         }
       `}</style>
     </motion.div>
