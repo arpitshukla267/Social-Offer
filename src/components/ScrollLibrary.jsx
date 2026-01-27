@@ -54,15 +54,6 @@ const Page = React.forwardRef((props, ref) => {
         style={{ transform: 'translateZ(1px)' }}
       />
 
-      {/* GRADIENT SHADOW - Simplified to 1 layer for stability */}
-      <div className={`absolute inset-y-0 w-24 z-[5] pointer-events-none 
-        ${isLeftPage 
-          ? 'right-0 bg-gradient-to-l from-black/10 to-transparent' 
-          : 'left-0 bg-gradient-to-r from-black/10 to-transparent'
-        }`} 
-        style={{ transform: 'translateZ(0.5px)' }}
-      />
-
       {/* PAGE CONTENT */}
       <div className="w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
         <img 
@@ -203,7 +194,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               clickEventForward={false}
               startZIndex={0}
               style={{ backgroundColor: 'white' }}
-              className="shadow-2xl"
+              className=""
             >
               {book.pages.map((p, i) => (
                 <Page key={i} number={i + 1} image={p} />
@@ -236,7 +227,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               clickEventForward={false}
               startZIndex={0}
               style={{ backgroundColor: 'white' }}
-              className="shadow-2xl"
+              className=""
             >
               {book.pages.map((p, i) => (
                 <Page key={i} number={i + 1} image={p} />
