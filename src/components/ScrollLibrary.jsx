@@ -52,7 +52,7 @@ const Page = React.forwardRef((props, ref) => {
       />
       
       {/* SHARP GUTTER SHADOW - For that tight crease look */}
-      <div className={`absolute inset-y-0 w-8 z-55 pointer-events-none 
+      <div className={`absolute inset-y-0 w-8 z-40 pointer-events-none 
         ${isLeftPage 
           ? 'right-0 bg-gradient-to-l from-black/20 to-transparent' 
           : 'left-0 bg-gradient-to-r from-black/20 to-transparent'
@@ -130,8 +130,8 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
         <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
         
         {/* Large Background Typography */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center items-center pointer-events-none opacity-[0.02]">
-            <span className="text-[25vw] font-black uppercase tracking-tighter text-black select-none leading-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center items-center pointer-events-none opacity-[0.02] select-none">
+            <span className="text-[25vw] font-black uppercase tracking-tighter text-black select-none leading-none pointer-events-none">
                {index + 1}
             </span>
         </div>
@@ -180,7 +180,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
             onInit={onInit}
             width={isMobile ? windowDims.width * 0.9 : 650}
             height={isMobile ? windowDims.height * 0.75 : 880}
-            size={isMobile ? "fixed" : "stretch"}
+            size="stretch"
             minWidth={isMobile ? 300 : 450}
             maxWidth={1400}
             minHeight={isMobile ? 400 : 600}
@@ -188,14 +188,14 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
             showCover={true}
             usePortrait={isMobile}
             onFlip={onFlip}
-            drawShadow={true}
-            maxShadowOpacity={0.3}
-            flippingTime={isMobile ? 800 : 1000}
+            drawShadow={false}
+            flippingTime={1000}
             useMouseEvents={true}
-            swipeDistance={isMobile ? 15 : 30}
+            swipeDistance={10}
             showPageCorners={false}
-            disableFlipByClick={isMobile}
+            disableFlipByClick={true}
             mobileScrollSupport={true}
+            clickEventForward={false}
             startZIndex={0}
             style={{ backgroundColor: 'transparent' }}
             className="shadow-2xl"
@@ -314,6 +314,32 @@ function LibraryContent() {
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        /* Fix flickering during 3D transforms */
+        .stf__parent {
+          perspective: 3000px !important;
+          backface-visibility: hidden !important;
+          -webkit-backface-visibility: hidden !important;
+          touch-action: none !important;
+        }
+        .stf__block {
+          backface-visibility: hidden !important;
+          -webkit-backface-visibility: hidden !important;
+          transform-style: preserve-3d !important;
+          will-change: transform;
+        }
+        .stf__item {
+          background-color: transparent !important;
+          box-shadow: none !important;
+        }
+        img {
+          -webkit-user-drag: none;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+          backface-visibility: hidden;
+        }
+        canvas {
+          display: none !important;
         }
       `}</style>
     </motion.div>
