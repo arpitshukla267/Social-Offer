@@ -38,14 +38,14 @@ const Page = React.forwardRef((props, ref) => {
   
   return (
     <div 
-      className={`overflow-hidden relative bg-white transform-gpu`} 
+      className={`overflow-hidden relative transform-gpu`} 
       ref={ref} 
       style={{ 
         willChange: 'transform',
         transformStyle: 'preserve-3d',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        backgroundColor: 'white'
+        backgroundColor: 'transparent'
       }}
     >
       {/* SIMPLE SPINE INDICATOR */}
@@ -122,46 +122,11 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
       id={`reel-${index}`}
       className="h-screen w-full snap-start relative flex flex-col items-center justify-center overflow-hidden shrink-0"
     >
-      {/* PROFESSIONAL BACKGROUND SYSTEM */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
-        {/* Technical Grid Overlay */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
-        
-        {/* Large Background Typography */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full flex justify-center items-center pointer-events-none opacity-[0.02] select-none">
-            <span className="text-[25vw] font-black uppercase tracking-tighter text-black select-none leading-none pointer-events-none">
-               {index + 1}
-            </span>
-        </div>
-
-        {/* Tilted Rad Shade Layer */}
-        <div className="absolute -inset-[100%] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(220,38,38,0.03)_0%,transparent_100%)] rotate-[15deg] transform-gpu" />
-        
-        {/* Gutter Linear Shade */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-zinc-200/50 via-transparent to-red-600/[0.01]" />
-
-        {/* Technical Layout Frames */}
-        <div className="absolute inset-20 border-[0.5px] border-black/[0.03] rounded-[40px]" />
-        
-        {/* Corner Brackets (The "Scope" Look) */}
-        <div className="absolute top-12 left-12 w-8 h-8 border-t-[0.5px] border-l-[0.5px] border-black/10 rounded-tl-xl" />
-        <div className="absolute top-12 right-12 w-8 h-8 border-t-[0.5px] border-r-[0.5px] border-black/10 rounded-tr-xl" />
-        <div className="absolute bottom-12 left-12 w-8 h-8 border-b-[0.5px] border-l-[0.5px] border-black/10 rounded-bl-xl" />
-        <div className="absolute bottom-12 right-12 w-8 h-8 border-b-[0.5px] border-r-[0.5px] border-black/10 rounded-br-xl" />
-
-        {/* Archive Labeling */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-4">
-            <div className="w-12 h-[1px] bg-red-600/20" />
-            <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-[1em]">Archive Ref: {String(index + 1).padStart(2, '0')}</span>
-            <div className="w-12 h-[1px] bg-red-600/20" />
-        </div>
-      </div>
-
-      {/* Main Diffused Center Light */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(180,0,0,0.02)_0%,rgba(245,245,245,1)_100%)]" />
+      {/* BACKGROUND REMOVED FOR CLEANER LOOK */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none" />
       
-      {/* Interactive Book - Now covering MAX screen */}
-      <div className="relative w-full flex justify-center items-center h-[75vh] md:h-[80vh]">
+      {/* Interactive Book Container */}
+      <div className="relative w-full flex justify-center items-center h-[75vh] md:h-[80vh] z-10">
         {!isMobile ? (
           <motion.div 
             animate={{ 
@@ -193,7 +158,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               mobileScrollSupport={true}
               clickEventForward={false}
               startZIndex={0}
-              style={{ backgroundColor: 'white' }}
+              style={{ backgroundColor: 'transparent' }}
               className=""
             >
               {book.pages.map((p, i) => (
@@ -226,7 +191,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               mobileScrollSupport={true}
               clickEventForward={false}
               startZIndex={0}
-              style={{ backgroundColor: 'white' }}
+              style={{ backgroundColor: 'transparent' }}
               className=""
             >
               {book.pages.map((p, i) => (
@@ -314,14 +279,13 @@ function LibraryContent() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="h-screen w-full bg-zinc-950 text-zinc-100 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans relative"
+      className="h-screen w-full bg-white text-zinc-900 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans relative"
     >
-      {/* Premium Gradient Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#18181b_0%,#09090b_100%)]" />
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-red-600/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] bg-red-900/10 blur-[120px] rounded-full" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
+      {/* Red and White Gradient Background - Single Global Layer */}
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-white">
+        <div className="absolute inset-0 bg-gradient-to-br from-red-100/50 via-white to-red-50/40" />
+        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-red-400/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] bg-red-300/10 blur-[120px] rounded-full" />
       </div>
       {/* Reels List */}
       {BOOKS.map((book, idx) => {
@@ -363,9 +327,10 @@ function LibraryContent() {
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
           transform-style: preserve-3d !important;
+          background-color: transparent !important; /* Force transparent blocks */
         }
         .stf__item {
-          background-color: white !important;
+          background-color: transparent !important;
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
           transform: translateZ(0); /* Final hardware push */
