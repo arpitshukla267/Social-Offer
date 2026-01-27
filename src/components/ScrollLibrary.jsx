@@ -37,7 +37,7 @@ const Page = React.forwardRef((props, ref) => {
   const isLeftPage = props.number % 2 === 0;
   
   return (
-    <div className={`overflow-hidden relative bg-white ${isLeftPage ? 'rounded-l-2xl' : 'rounded-r-2xl'}`} ref={ref}>
+    <div className={`overflow-hidden relative bg-white transform-gpu ${isLeftPage ? 'rounded-l-2xl' : 'rounded-r-2xl'}`} ref={ref} style={{ willChange: 'transform' }}>
       {/* CENTRAL SPINE ONLY - No outer borders */}
       <div className={`absolute inset-y-0 w-[1.5px] z-[60] bg-black/10 
         ${isLeftPage ? 'right-0' : 'left-0'}`} 
@@ -65,15 +65,15 @@ const Page = React.forwardRef((props, ref) => {
         <div className={`absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-gradient-to-br from-black/[0.05] via-transparent to-transparent rotate-12 transform-gpu`} />
       </div>
 
-      {/* PAGE CONTENT */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="w-full h-full p-1"
-      >
-        <img src={props.image} alt={`Page ${props.number}`} className="w-full h-full object-cover shadow-sm" />
-      </motion.div>
+      {/* PAGE CONTENT - Simplified for performance */}
+      <div className="w-full h-full p-1">
+        <img 
+          src={props.image} 
+          alt={`Page ${props.number}`} 
+          className="w-full h-full object-cover select-none" 
+          loading="eager"
+        />
+      </div>
       
       {/* Refined Page Number UI */}
       <div className={`absolute bottom-8 ${isLeftPage ? 'left-10' : 'right-10'} z-[70] flex items-center gap-2`}>
@@ -102,13 +102,10 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
     setCurrentPage(pageIndex);
 
     // Dynamic Sound Logic
-    try {
+    if (pageIndex !== undefined) {
       const audio = new Audio("https://www.soundjay.com/misc/sounds/page-flip-01a.mp3");
-      // Adjust volume based on whether it's a cover flip or internal
       audio.volume = pageIndex === 0 ? 0.3 : 0.2;
-      audio.play();
-    } catch (err) {
-      console.log("Audio play failed:", err);
+      audio.play().catch(e => console.log("Audio play failed:", e));
     }
 
     // Auto-scroll logic: If we reached the very last page
@@ -192,8 +189,16 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
             usePortrait={isMobile}
             onFlip={onFlip}
             drawShadow={true}
+            maxShadowOpacity={0.3}
+            flippingTime={isMobile ? 800 : 1000}
+            useMouseEvents={true}
+            swipeDistance={isMobile ? 15 : 30}
+            showPageCorners={false}
+            disableFlipByClick={isMobile}
+            mobileScrollSupport={true}
+            startZIndex={0}
             style={{ backgroundColor: 'transparent' }}
-            className=""
+            className="shadow-2xl"
           >
             {book.pages.map((p, i) => (
               <Page key={i} number={i + 1} image={p} />
@@ -279,7 +284,7 @@ function LibraryContent() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="h-screen w-full bg-zinc-100 text-zinc-900 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar transition-all duration-700 font-sans"
+      className="h-screen w-full bg-zinc-100 text-zinc-900 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans"
     >
       {/* Reels List */}
       {BOOKS.map((book, idx) => {
