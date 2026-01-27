@@ -1,14 +1,12 @@
 import React from 'react'
-import Header from '../components/layout/Header'
-import Hero from '../components/layout/Hero'
+import ScrollLibrary from '../components/ScrollLibrary'
+import Hero from '../components/Hero'
 
-function page() {
+export default function Home() {
   return (
-    <div>
-        <Header />
-        <Hero />
-    </div>
+    <main className="min-h-screen">
+      <Hero />
+      {/* <ScrollLibrary /> */}
+    </main>
   )
 }
-
-export default page
