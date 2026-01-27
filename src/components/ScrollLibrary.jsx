@@ -64,12 +64,13 @@ const Page = React.forwardRef((props, ref) => {
       />
 
       {/* PAGE CONTENT */}
-      <div className="w-full h-full p-1" style={{ transform: 'translateZ(0px)' }}>
+      <div className="w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
         <img 
           src={props.image} 
           alt={`Page ${props.number}`} 
           className="w-full h-full object-cover select-none" 
           loading="eager"
+          decoding="sync"
         />
       </div>
       
@@ -88,8 +89,7 @@ const Page = React.forwardRef((props, ref) => {
 Page.displayName = "Page";
 
 const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad }) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const flipBookRef = useRef(null);
+  const currentPageRef = useRef(0);
 
   if (!shouldLoad) {
     return (
@@ -99,7 +99,12 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
 
   const onFlip = (e) => {
     const pageIndex = e.data;
-    setCurrentPage(pageIndex);
+    currentPageRef.current = pageIndex;
+    
+    // Only update state on desktop where it's used for centering animation
+    if (!isMobile) {
+      setCurrentPage(pageIndex);
+    }
 
     // Dynamic Sound Logic
     if (pageIndex !== undefined) {
@@ -353,29 +358,35 @@ function LibraryContent() {
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
           touch-action: pan-y !important;
-          background-color: transparent !important;
         }
         .stf__block {
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
           transform-style: preserve-3d !important;
-          will-change: transform;
-          background-color: white !important; /* Ensure solid blocks */
         }
         .stf__item {
           background-color: white !important;
           backface-visibility: hidden !important;
           -webkit-backface-visibility: hidden !important;
+          transform: translateZ(0); /* Final hardware push */
         }
         img {
           -webkit-user-drag: none;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
           backface-visibility: hidden !important;
-          transform: translateZ(0); /* Force layering */
+          transform: translate3d(0,0,0);
         }
         canvas {
           display: none !important;
+        }
+        /* Anti-flash Fix */
+        .stf__wrapper {
+          background-color: transparent !important;
+        }
+        /* Force no transition during swap */
+        .stf__item * {
+           transition: none !important;
         }
         /* Prevent selection flickering */
         * {
