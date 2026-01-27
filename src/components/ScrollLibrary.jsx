@@ -48,9 +48,9 @@ const Page = React.forwardRef((props, ref) => {
         backgroundColor: 'transparent'
       }}
     >
-      {/* SIMPLE SPINE INDICATOR */}
+      {/* SIMPLE SPINE INDICATOR - Hidden on Mobile Portrait */}
       <div className={`absolute inset-y-0 w-[1px] z-[10] bg-black/5 
-        ${isLeftPage ? 'right-0' : 'left-0'}`} 
+        ${isLeftPage ? 'right-0' : 'left-0'} md:block hidden`} 
         style={{ transform: 'translateZ(1px)' }}
       />
 
@@ -167,18 +167,18 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
             </HTMLFlipBook>
           </motion.div>
         ) : (
-          <div className="relative">
+          <div className="relative w-screen flex justify-center">
             <HTMLFlipBook
               key={`${book.id}-mobile`}
               ref={flipBookRef}
               onInit={onInit}
-              width={380}
-              height={550}
-              size="stretch"
-              minWidth={300}
-              maxWidth={1400}
+              width={windowDims.width - 40}
+              height={(windowDims.width - 40) * 1.4}
+              size="fixed"
+              minWidth={280}
+              maxWidth={windowDims.width - 20}
               minHeight={400}
-              maxHeight={1800}
+              maxHeight={windowDims.height * 0.8}
               showCover={true}
               usePortrait={true}
               onFlip={onFlip}
@@ -191,7 +191,7 @@ const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad })
               mobileScrollSupport={true}
               clickEventForward={false}
               startZIndex={0}
-              style={{ backgroundColor: 'transparent' }}
+              style={{ margin: '0 auto', backgroundColor: 'transparent' }}
               className=""
             >
               {book.pages.map((p, i) => (
