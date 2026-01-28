@@ -33,30 +33,7 @@ const BooksHero = () => {
   return (
     <section id="hero-section" className="relative min-h-screen bg-zinc-50 text-zinc-900 overflow-hidden selection:bg-red-600 selection:text-white">
       <AnimatePresence>
-        {isExiting && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] bg-zinc-50 flex flex-col items-center justify-center"
-          >
-            <div className="relative">
-              <motion.h2 
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-4xl font-black uppercase tracking-tighter text-black"
-              >
-                SOCIAL <span className="text-red-600">OFFER.</span>
-              </motion.h2>
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
-                className="h-1 bg-red-600 mt-2"
-              />
-            </div>
-          </motion.div>
-        )}
+        {/* Loader removed to avoid duplication with ScrollLibrary loader */}
       </AnimatePresence>
 
       <motion.div 

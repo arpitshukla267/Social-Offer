@@ -1,20 +1,22 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, MousePointer2, ChevronDown, ArrowLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 
 const HTMLFlipBook = dynamic(() => import("react-pageflip"), {
   ssr: false,
   loading: () => <div className="bg-transparent w-full h-full" />,
 });
 
+/* =======================
+   DATA
+======================= */
+
 const BOOK_PAGES = [
-  "/Book1/1st.webp",
-  "/Book1/2nd.webp",
+  "/Book1/1st.webp", // cover
+  "/Book1/2nd.webp", // back of cover
   "/Book1/3rd.webp",
   "/Book1/4th.webp",
   "/Book1/5th.webp",
@@ -22,52 +24,90 @@ const BOOK_PAGES = [
   "/Book1/8th.webp",
   "/Book1/9th.webp",
   "/Book1/10th.webp",
-  "/Book1/11th.webp"
+  "/Book1/11th.webp",
 ];
 
-const BOOKS = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  title: `Project ${String(i + 1).padStart(2, '0')}`,
-  category: i % 2 === 0 ? "Brand Strategy" : "Digital Production",
-  cover: "/Book1/1st.webp",
-  pages: BOOK_PAGES,
-}));
+const BOOKS = [
+  {
+    id: 1,
+    title: "Brand Strategy Guide",
+    category: "Brand Strategy",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+  {
+    id: 2,
+    title: "Digital Production",
+    category: "Digital Production",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+  {
+    id: 3,
+    title: "Marketing Excellence",
+    category: "Brand Strategy",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+  {
+    id: 4,
+    title: "Creative Portfolio",
+    category: "Digital Production",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+  {
+    id: 5,
+    title: "Design Showcase",
+    category: "Brand Strategy",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+  {
+    id: 6,
+    title: "Innovation Report",
+    category: "Digital Production",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES,
+  },
+];
 
-const Page = React.forwardRef((props, ref) => {
-  const isLeftPage = props.number % 2 === 0;
-  
+/* =======================
+   PAGE COMPONENT
+======================= */
+
+const Page = React.forwardRef(({ image, number }, ref) => {
+  const isLeftPage = number % 2 === 0;
+
   return (
-    <div 
-      className="overflow-hidden relative" 
-      ref={ref} 
-      style={{ 
-        backgroundColor: 'transparent'
-      }}
-    >
-      {/* SIMPLE SPINE INDICATOR - Hidden on Mobile Portrait */}
-      <div className={`absolute inset-y-0 w-[1px] z-[10] bg-black/5 
-        ${isLeftPage ? 'right-0' : 'left-0'} md:block hidden`} 
-        style={{ transform: 'translateZ(1px)' }}
+    <div ref={ref} className="relative overflow-hidden bg-transparent">
+      {/* Book Spine Junction - More Realistic */}
+      <div
+        className={`absolute inset-y-0 ${isLeftPage ? "right-0" : "left-0"} md:block hidden`}
+        style={{ width: '4px' }}
+      >
+        {/* Dark center line */}
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-black/60 z-10" />
+        {/* Shadow on left */}
+        <div className={`absolute inset-y-0 ${isLeftPage ? "left-0" : "right-0"} w-[2px] bg-gradient-to-r ${isLeftPage ? "from-black/20 to-transparent" : "from-transparent to-black/20"} z-[9]`} />
+        {/* Shadow on right */}
+        <div className={`absolute inset-y-0 ${isLeftPage ? "right-0" : "left-0"} w-[2px] bg-gradient-to-r ${isLeftPage ? "from-transparent to-black/10" : "from-black/10 to-transparent"} z-[9]`} />
+      </div>
+
+      <img
+        src={image}
+        alt={`Page ${number}`}
+        className="w-full h-full object-cover select-none"
+        draggable={false}
       />
 
-      {/* PAGE CONTENT */}
-      <div className="w-full h-full" style={{ backfaceVisibility: 'hidden' }}>
-        <img 
-          src={props.image} 
-          alt={`Page ${props.number}`} 
-          className="w-full h-full object-cover select-none" 
-          loading="eager"
-          decoding="sync"
-        />
-      </div>
-      
-      {/* Page Number */}
-      <div 
-        className={`absolute bottom-8 ${isLeftPage ? 'left-10' : 'right-10'} z-[15] flex items-center gap-2`}
-        style={{ transform: 'translateZ(2px)' }}
+      <div
+        className={`absolute bottom-8 ${
+          isLeftPage ? "left-10" : "right-10"
+        } z-20`}
       >
         <span className="text-[10px] font-black text-black/40 tracking-[0.2em]">
-          {String(props.number).padStart(2, '0')}
+          {String(number).padStart(2, "0")}
         </span>
       </div>
     </div>
@@ -75,138 +115,207 @@ const Page = React.forwardRef((props, ref) => {
 });
 Page.displayName = "Page";
 
-const BookReelItem = ({ book, index, isMobile, windowDims, onInit, shouldLoad }) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const currentPageRef = useRef(0);
-  const flipBookRef = useRef(null);
+/* =======================
+   BOOK ITEM
+======================= */
 
-  if (!shouldLoad) {
-    return (
-      <section id={`reel-${index}`} className="h-screen w-full snap-start relative flex items-center justify-center bg-zinc-100" />
+function BookReelItem({
+  book,
+  index,
+  isMobile,
+  windowDims,
+  onInit,
+  shouldLoad,
+}) {
+  const [currentPage, setCurrentPage] = useState(0);
+  const flipBookRef = useRef(null);
+  const hasFlippedInitially = useRef(false);
+
+  // Trigger initial half-flip animation when book becomes visible
+  useEffect(() => {
+    if (!shouldLoad || !flipBookRef.current) return;
+
+    const sectionElement = document.getElementById(`reel-${index}`);
+    if (!sectionElement) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasFlippedInitially.current) {
+            hasFlippedInitially.current = true;
+            setTimeout(() => {
+              try {
+                const pageFlip = flipBookRef.current?.pageFlip();
+                if (pageFlip && typeof pageFlip.flip === 'function') {
+                  // Flip to page 1
+                  pageFlip.flip(1, "top");
+                  // Hold for 1.2 seconds
+                  setTimeout(() => {
+                    // Flip back to cover
+                    pageFlip.flip(0, "top");
+                  }, 1200);
+                }
+              } catch (error) {
+                console.log("Page flip animation skipped");
+              }
+            }, 800);
+          }
+        });
+      },
+      { threshold: 0.5 }
     );
-  }
+
+    observer.observe(sectionElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [shouldLoad, index, isMobile]);
+
+  if (!shouldLoad)
+    return (
+      <section
+        id={`reel-${index}`}
+        className="h-screen w-full snap-start"
+      />
+    );
 
   const onFlip = (e) => {
     const pageIndex = e.data;
-    currentPageRef.current = pageIndex;
-    
-    // Only update state on desktop where it's used for centering animation
-    if (!isMobile) {
-      setCurrentPage(pageIndex);
-    }
 
-    // Dynamic Sound Logic
+    if (!isMobile) setCurrentPage(pageIndex);
+
     if (pageIndex !== undefined) {
-      const audio = new Audio("https://www.soundjay.com/misc/sounds/page-flip-01a.mp3");
+      const audio = new Audio(
+        "https://www.soundjay.com/misc/sounds/page-flip-01a.mp3"
+      );
       audio.volume = pageIndex === 0 ? 0.3 : 0.2;
-      audio.play().catch(e => console.log("Audio play failed:", e));
+      audio.play().catch(() => {});
     }
 
-    // Auto-scroll logic: If we reached the very last page
+    // Auto-scroll to next book when finished
     if (pageIndex === book.pages.length - 1) {
       setTimeout(() => {
         const nextSection = document.getElementById(`reel-${index + 1}`);
         if (nextSection) {
-          nextSection.scrollIntoView({ behavior: 'smooth' });
+          nextSection.scrollIntoView({ behavior: "smooth" });
         }
-      }, 1500); // Give time to see the "Finished" shift (25%)
+      }, 1500);
     }
   };
 
   return (
-    <section 
+    <section
       id={`reel-${index}`}
-      className="h-screen w-full snap-start relative flex flex-col items-center justify-center overflow-hidden shrink-0"
+      className="h-screen w-full snap-start flex flex-col items-center justify-center relative"
     >
-      {/* BACKGROUND REMOVED FOR CLEANER LOOK */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none" />
-      
-      {/* Interactive Book Container - Forced Fixed Centering */}
-      <div className="relative w-full flex justify-center items-center h-[500px] md:h-[80vh] z-10">
+      {/* Book Title Display */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        className="absolute top-12 left-1/2 -translate-x-1/2 z-0"
+        style={{ willChange: "opacity, transform" }}
+      >
+        <h2 className="text-2xl md:text-3xl font-black text-nowrap uppercase tracking-tighter text-zinc-900">
+          {book.title}
+        </h2>
+        <div className="h-1 bg-red-600 mt-2" />
+      </motion.div>
+
+      <div className="relative w-full h-[70vh] mt-24 flex justify-center items-center">
         {!isMobile ? (
-          <motion.div 
-            animate={{ 
-              x: currentPage === 0 ? "-25%" : (currentPage === book.pages.length - 1 ? "25%" : "0%")
+          <motion.div
+            animate={{
+              x:
+                currentPage === 0
+                  ? "-25%"
+                  : currentPage === book.pages.length - 1
+                  ? "25%"
+                  : "0%",
             }}
             transition={{ type: "spring", damping: 30, stiffness: 120 }}
-            className="relative"
+            style={{ willChange: "transform" }}
           >
+            {/* ================= DESKTOP BOOK ================= */}
             <HTMLFlipBook
-              key={`${book.id}-${isMobile}`}
               ref={flipBookRef}
               onInit={onInit}
-              width={650}
-              height={880}
-              size="stretch"
-              minWidth={450}
-              maxWidth={1400}
-              minHeight={600}
-              maxHeight={1800}
+              width={454}
+              height={640}
+              size="fixed"
               showCover={true}
+              startPage={0}
               usePortrait={false}
               onFlip={onFlip}
               drawShadow={false}
               flippingTime={1000}
-              useMouseEvents={true}
               swipeDistance={30}
               showPageCorners={false}
-              disableFlipByClick={true}
-              mobileScrollSupport={true}
+              disableFlipByClick
+              useMouseEvents={true}
+              mobileScrollSupport
               clickEventForward={false}
-              startZIndex={0}
-              style={{ backgroundColor: 'transparent' }}
-              className=""
+              style={{ 
+                backgroundColor: "transparent",
+                willChange: "transform",
+                transform: "translateZ(0)"
+              }}
             >
-              {book.pages.map((p, i) => (
-                <Page key={i} number={i + 1} image={p} />
+              {/* COVER */}
+              <Page image={book.pages[0]} number={1} />
+
+              {/* BACK OF COVER */}
+              <Page image={book.pages[1]} number={2} />
+
+              {/* REST PAGES */}
+              {book.pages.slice(2).map((p, i) => (
+                <Page key={i} image={p} number={i + 3} />
               ))}
             </HTMLFlipBook>
           </motion.div>
         ) : (
-          <div className="relative w-screen flex justify-center">
-            <HTMLFlipBook
-              key={`${book.id}-mobile`}
-              ref={flipBookRef}
-              onInit={onInit}
-              width={Math.floor(windowDims.width - 40)}
-              height={Math.floor((windowDims.width - 40) * 1.4)}
-              size="fixed"
-              minWidth={280}
-              maxWidth={windowDims.width - 20}
-              minHeight={400}
-              maxHeight={Math.floor(windowDims.height * 0.7)}
-              showCover={false} // Disabled for mobile portrait to prevent "spread" alignment jumps
-              usePortrait={true}
-              onFlip={onFlip}
-              drawShadow={false}
-              maxShadowOpacity={0}
-              flippingTime={1000}
-              useMouseEvents={true}
-              swipeDistance={10}
-              showPageCorners={false}
-              disableFlipByClick={true}
-              mobileScrollSupport={true}
-              clickEventForward={false}
-              startZIndex={0}
-              style={{ margin: '0 auto', backgroundColor: 'transparent' }}
-              className="bg-transparent"
-            >
-              {book.pages.map((p, i) => (
-                <Page key={i} number={i + 1} image={p} />
-              ))}
-            </HTMLFlipBook>
-          </div>
+          /* ================= MOBILE BOOK ================= */
+          <HTMLFlipBook
+            ref={flipBookRef}
+            onInit={onInit}
+            width={windowDims.width - 40}
+            height={(windowDims.width - 40) * 1.4}
+            size="fixed"
+            showCover={false}
+            usePortrait={true}
+            onFlip={onFlip}
+            drawShadow={false}
+            flippingTime={800}
+            swipeDistance={30}
+            showPageCorners={false}
+            useMouseEvents={true}
+            mobileScrollSupport
+            clickEventForward={false}
+            style={{ 
+              willChange: "transform",
+              transform: "translateZ(0)"
+            }}
+          >
+            {book.pages.map((p, i) => (
+              <Page key={i} image={p} number={i + 1} />
+            ))}
+          </HTMLFlipBook>
         )}
       </div>
     </section>
   );
-};
+}
+
+/* =======================
+   MAIN LIBRARY
+======================= */
 
 function LibraryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedId = parseInt(searchParams.get("id")) || 1;
-  const selectedIndex = BOOKS.findIndex(b => b.id === selectedId);
+  const selectedIndex = BOOKS.findIndex((b) => b.id === selectedId);
 
   const [isMobile, setIsMobile] = useState(false);
   const [windowDims, setWindowDims] = useState({ width: 1200, height: 800 });
@@ -215,148 +324,94 @@ function LibraryContent() {
 
   useEffect(() => {
     setMounted(true);
-    const check = () => {
+    const update = () => {
       setIsMobile(window.innerWidth < 768);
       setWindowDims({ width: window.innerWidth, height: window.innerHeight });
     };
-    check();
-    window.addEventListener("resize", check);
+    update();
+    window.addEventListener("resize", update);
 
-    // FAIL-SAFE: If the book takes more than 3s to initialize, show the page anyway
-    const timer = setTimeout(() => {
-      setIsBookReady(true);
-    }, 3000);
+    const timer = setTimeout(() => setIsBookReady(true), 800);
 
     return () => {
-      window.removeEventListener("resize", check);
+      window.removeEventListener("resize", update);
       clearTimeout(timer);
     };
   }, []);
 
-  // Handle scrolling to the selected book once it's ready
   useEffect(() => {
-    if (isBookReady && mounted) {
-      const target = document.getElementById(`reel-${selectedIndex}`);
-      if (target) {
-        target.scrollIntoView({ behavior: 'instant' });
-      }
+    if (mounted && isBookReady) {
+      document
+        .getElementById(`reel-${selectedIndex}`)
+        ?.scrollIntoView({ behavior: "instant" });
     }
-  }, [isBookReady, mounted, selectedIndex]);
+  }, [mounted, isBookReady, selectedIndex]);
 
-  if (!mounted || !isBookReady) return (
-    <div className="fixed inset-0 z-[500] bg-zinc-950 flex flex-col items-center justify-center">
-      {/* Cinematic Lighter Atmosphere for Loader */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute -inset-[100%] bg-[radial-gradient(45%_50%_at_50%_50%,rgba(220,38,38,0.05)_0%,transparent_100%)] rotate-12 transform-gpu" />
-      </div>
-      
-      <div className="relative z-10">
-        <motion.h2 
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="text-4xl font-black uppercase tracking-tighter text-white"
-        >
-          SOCIAL <span className="text-red-600">OFFER.</span>
-        </motion.h2>
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="h-1 bg-red-600 mt-2"
-        />
-        <div className="text-[10px] font-mono text-zinc-400 mt-4 tracking-[0.4em] uppercase text-center animate-pulse">
-           Opening Selected Archive...
-        </div>
+  return (
+    <div className="relative h-screen w-full bg-white overflow-hidden">
+      <AnimatePresence>
+        {(!mounted || !isBookReady) && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[500] bg-zinc-950 flex flex-col items-center justify-center"
+          >
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+              <div className="absolute -inset-[100%] bg-[radial-gradient(45%_50%_at_50%_50%,rgba(220,38,38,0.05)_0%,transparent_100%)] rotate-12 transform-gpu" />
+            </div>
+
+            <div className="relative z-10">
+              <motion.h2
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-4xl font-black uppercase tracking-tighter text-white"
+              >
+                SOCIAL <span className="text-red-600">OFFER.</span>
+              </motion.h2>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
+                className="h-1 bg-red-600 mt-2"
+              />
+              <div className="text-[10px] font-mono text-zinc-400 mt-4 tracking-[0.4em] uppercase text-center animate-pulse">
+                Opening Selected Archive...
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="h-screen w-full overflow-y-scroll overflow-x-hidden snap-y snap-mandatory bg-white">
+        {mounted && BOOKS.map((book, idx) => (
+          <BookReelItem
+            key={book.id}
+            book={book}
+            index={idx}
+            isMobile={isMobile}
+            windowDims={windowDims}
+            shouldLoad={true}
+            onInit={
+              idx === selectedIndex
+                ? () => setTimeout(() => setIsBookReady(true), 500)
+                : undefined
+            }
+          />
+        ))}
       </div>
     </div>
   );
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="h-screen w-full bg-white text-zinc-900 overflow-y-scroll snap-y snap-mandatory scroll-smooth hide-scrollbar font-sans relative"
-    >
-      {/* Red and White Gradient Background - Single Global Layer */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-red-100/50 via-white to-red-50/40" />
-        <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-red-400/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] bg-red-300/10 blur-[120px] rounded-full" />
-      </div>
-      {/* Reels List */}
-      {BOOKS.map((book, idx) => {
-        // Condition: Load if it's the selected book, OR if selected book is ready, load next two
-        const shouldLoad = idx === selectedIndex || (isBookReady && idx > selectedIndex && idx <= selectedIndex + 2);
-
-        return (
-          <BookReelItem 
-            key={book.id} 
-            book={book} 
-            index={idx} 
-            isMobile={isMobile} 
-            windowDims={windowDims}
-            shouldLoad={shouldLoad}
-            onInit={idx === selectedIndex ? () => {
-              // Ensure the component has a couple of frames to paint before revealing
-              setTimeout(() => setIsBookReady(true), 300);
-            } : undefined}
-          />
-        );
-      })}
-
-      <style jsx global>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        /* Fix flickering during 3D transforms */
-        .stf__parent {
-          perspective: none !important; /* Disable manual perspective to let library handle it */
-          touch-action: pan-y !important;
-        }
-        .stf__block {
-          background-color: transparent !important;
-        }
-        .stf__item {
-          background-color: transparent !important;
-        }
-        /* Aggressive jump prevention */
-        .stf__wrapper, .stf__parent, .stf__block, .stf__item {
-          background-color: transparent !important;
-          transition: none !important; /* Kill all transitions that cause layout jumping */
-        }
-        /* Specific positioning stabilization */
-        .stf__wrapper {
-          position: absolute !important;
-          top: 50% !important;
-          left: 50% !important;
-          transform: translate(-50%, -50%) !important;
-        }
-        img {
-          -webkit-user-drag: none;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-        canvas {
-          display: none !important;
-        }
-        /* Prevent selection flickering */
-        * {
-          -webkit-user-select: none;
-          -webkit-touch-callout: none;
-        }
-      `}</style>
-    </motion.div>
-  );
 }
+
+/* =======================
+   EXPORT
+======================= */
 
 export default function ScrollLibrary() {
   return (
-    <Suspense fallback={<div className="h-screen w-full bg-zinc-50" />}>
+    <Suspense fallback={<div className="h-screen w-full bg-black" />}>
       <LibraryContent />
     </Suspense>
   );
