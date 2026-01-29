@@ -5,19 +5,101 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ArrowRight, MousePointer2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const BOOK_PAGES = [
+const BOOK_PAGES_1 = [
   "/Book1/1st.webp", "/Book1/2nd.webp", "/Book1/3rd.webp", "/Book1/4th.webp",
   "/Book1/5th.webp", "/Book1/6th.webp", "/Book1/8th.webp", "/Book1/9th.webp",
   "/Book1/10th.webp", "/Book1/11th.webp"
 ];
 
-const BOOKS = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  title: `Project ${String(i + 1).padStart(2, '0')}`,
-  category: i % 2 === 0 ? "Brand Strategy" : "Digital Production",
-  cover: "/Book1/1st.webp",
-  pages: BOOK_PAGES,
-}));
+const BOOK_PAGES_2 = [
+  "/Book2/1st.jpeg", "/Book2/2nd.jpeg", "/Book2/3rd.jpeg", "/Book2/4th.jpeg",
+  "/Book2/5th.jpeg", "/Book2/6th.jpeg", "/Book2/8th.jpeg", "/Book2/9th.jpeg",
+  "/Book2/10th.jpeg", "/Book2/11th.jpeg"
+];
+
+const BOOK_PAGES_3 = [
+  "/Book3/1st.jpeg", "/Book3/2nd.jpeg", "/Book3/3rd.jpeg", "/Book3/4th.jpeg",
+  "/Book3/5th.jpeg", "/Book3/6th.jpeg", "/Book3/8th.jpeg", "/Book3/9th.jpeg",
+  "/Book3/10th.jpeg", "/Book3/11th.jpeg"
+];
+
+const BOOK_PAGES_4 = [
+  "/Book4/1.png", "/Book4/2.png", "/Book4/3.png", "/Book4/4.png",
+  "/Book4/5.png", "/Book4/6.png", "/Book4/8.png", "/Book4/9.png",
+  "/Book4/10.png", "/Book4/11.png"
+];
+
+const BOOK_PAGES_5 = [
+  "/Book5/1.png", "/Book5/2.png", "/Book5/3.png", "/Book5/4.png",
+  "/Book5/5.png", "/Book5/6.png", "/Book5/8.png", "/Book5/9.png",
+  "/Book5/10.png", "/Book5/11.png"
+];
+
+const BOOK_PAGES_6 = [
+  "/Book6/1.png", "/Book6/2.png", "/Book6/3.png", "/Book6/4.png",
+  "/Book6/5.png", "/Book6/6.png", "/Book6/8.png", "/Book6/9.png",
+  "/Book6/10.png", "/Book6/11.png", "/Book6/12.png", "/Book6/13.png",
+  "/Book6/14.png", "/Book6/15.png", "/Book6/16.png", "/Book6/17.png",
+  "/Book6/18.png"
+];
+
+const BOOK_PAGES_7 = [
+  "/Book7/1.png", "/Book7/2.png", "/Book7/3.png", "/Book7/4.png",
+  "/Book7/5.png", "/Book7/6.png", "/Book7/8.png", "/Book7/9.png",
+  "/Book7/10.png", "/Book7/11.png", "/Book7/12.png"
+];
+
+const BOOKS = [
+  {
+    id: 1,
+    title: "Bonnex Logistics",
+    category: "Brand Strategy",
+    cover: "/Book1/1st.webp",
+    pages: BOOK_PAGES_1,
+  },
+  {
+    id: 2,
+    title: "Rise Engineering Pvt Ltd",
+    category: "Digital Production",
+    cover: "/Book2/1st.jpeg",
+    pages: BOOK_PAGES_2,
+  },
+  {
+    id: 3,
+    title: "Swasth Bharat Healthcare",
+    category: "Brand Strategy",
+    cover: "/Book3/1st.jpeg",
+    pages: BOOK_PAGES_3,
+  },
+  {
+    id: 4,
+    title: "Swasth Bharat Healthcare",
+    category: "Digital Production",
+    cover: "/Book4/1.png",
+    pages: BOOK_PAGES_4,
+  },
+  {
+    id: 5,
+    title: "Shri Sidhi Infra Projects",
+    category: "Brand Strategy",
+    cover: "/Book5/1.png",
+    pages: BOOK_PAGES_5,
+  },
+  {
+    id: 6,
+    title: "Robotics & Ai Labs",
+    category: "Digital Production",
+    cover: "/Book6/1.png",
+    pages: BOOK_PAGES_6,
+  },
+  {
+    id: 7,
+    title: "Rise Engineering Pvt Ltd", 
+    category: "Brand Strategy",
+    cover: "/Book7/1.png",
+    pages: BOOK_PAGES_7,
+  },
+];
 
 const BooksHero = () => {
   const router = useRouter();
@@ -54,7 +136,7 @@ const BooksHero = () => {
 
       <div className="max-w-[1400px] mx-auto px-6 md:px-8 pt-16 md:pt-32 pb-12 md:pb-20 relative z-10">
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12 md:mb-24">
           <div className="max-w-3xl">
             
             <motion.h1 
@@ -133,10 +215,10 @@ const BooksHero = () => {
                 </motion.div>
 
                 {/* Footer Info inside Card */}
-                <div className="absolute bottom-0 left-0 w-full p-8 z-20 flex justify-between items-end translate-y-6 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-700">
+                <div className="absolute bg-gradient-to-t from-black/50 to-transparent bottom-0 left-0 w-full p-8 z-20 flex justify-between items-end translate-y-6 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-700">
                     <div>
                         <div className="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-1">{book.category}</div>
-                        <h3 className="text-xl font-black uppercase tracking-tighter line-clamp-1 text-black">{book.title}</h3>
+                        <h3 className="text-xl font-black uppercase tracking-tighter line-clamp-1 text-white">{book.title}</h3>
                     </div>
                     <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white">
                         <ArrowRight size={18} />
