@@ -829,7 +829,7 @@ function BookReelItem({
               delay: 0.15,
               ease: [0.25, 0.46, 0.45, 0.94] // Custom easing for smoother animation
             }}
-            className="w-full flex justify-center items-center"
+            className="w-[90%] flex justify-center items-center"
             style={{ 
               willChange: "transform, opacity",
               backfaceVisibility: "hidden",
