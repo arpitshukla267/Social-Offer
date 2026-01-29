@@ -27,3 +27,32 @@ body {
   perspective: 2000px;
 }
 
+/* ===== react-pageflip BLEED FIX ===== */
+/* ==============================
+   react-pageflip BLEED FIX
+============================== */
+
+/* Page wrapper */
+.stf__item {
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+/* 🔥 BACK SIDE — YAHI MAIN CULPRIT HAI */
+.stf__item.--back {
+  background: transparent !important;
+}
+
+/* Inner page isolation */
+.stf__item > div {
+  isolation: isolate;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Images hard clip */
+.stf__item img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  clip-path: inset(0);
+}

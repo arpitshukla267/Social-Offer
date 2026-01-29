@@ -247,65 +247,40 @@ const BOOKS = [
 ======================= */
 
 const Page = React.forwardRef(({ image, number, isMobile }, ref) => {
-  const isLeftPage = number % 2 === 0;
-
   return (
-    <div 
-      ref={ref} 
-      className="relative overflow-hidden bg-transparent"
+    <div
+      ref={ref}
+      className="relative w-full h-full bg-transparent"
       style={{
-        width: '100%',
-        height: '100%',
-        minWidth: '100%',
-        minHeight: '100%',
-        display: 'block',
-        position: 'relative'
+        overflow: "hidden",
+        isolation: "isolate",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
       }}
     >
-      {/* Book Spine Junction - More Realistic */}
-      <div
-        className={`absolute inset-y-0 ${isLeftPage ? "right-0" : "left-0"} md:block hidden`}
-        style={{ width: '4px' }}
-      >
-        {/* Dark center line */}
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-black/60 z-10" />
-        {/* Shadow on left */}
-        <div className={`absolute inset-y-0 ${isLeftPage ? "left-0" : "right-0"} w-[2px] bg-gradient-to-r ${isLeftPage ? "from-black/20 to-transparent" : "from-transparent to-black/20"} z-[9]`} />
-        {/* Shadow on right */}
-        <div className={`absolute inset-y-0 ${isLeftPage ? "right-0" : "left-0"} w-[2px] bg-gradient-to-r ${isLeftPage ? "from-transparent to-black/10" : "from-black/10 to-transparent"} z-[9]`} />
-      </div>
-
       <img
         src={image}
         alt={`Page ${number}`}
-        className="absolute inset-0 w-full h-full select-none"
         draggable={false}
-        loading="lazy"
+        className="absolute inset-0 w-full h-full select-none"
         style={{
-          width: '100%',
-          height: '100%',
-          objectFit: isMobile ? 'contain' : 'cover',
-          objectPosition: 'center',
-          willChange: "transform",
+          objectFit: isMobile ? "contain" : "cover",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
+          clipPath: "inset(0)",
           transform: "translateZ(0)",
-          imageRendering: "auto"
         }}
       />
 
-      <div
-        className={`absolute bottom-4 md:bottom-8 ${
-          isLeftPage ? "left-4 md:left-10" : "right-4 md:right-10"
-        } z-20`}
-      >
-        <span className="text-[8px] md:text-[10px] font-black text-black/40 tracking-[0.2em]">
+      <div className="absolute bottom-4 right-4 z-20">
+        <span className="text-[10px] text-black/40">
           {String(number).padStart(2, "0")}
         </span>
       </div>
     </div>
   );
 });
+
 Page.displayName = "Page";
 
 /* =======================
@@ -864,17 +839,19 @@ function BookReelItem({
             <HTMLFlipBook
               ref={flipBookRef}
               onInit={handleInit}
-              width={400}
-              height={ 560}
+              width={450}
+              height={500}              
               size="fixed"
               showCover={false}
               usePortrait={true}
               onFlip={onFlip}
-              drawShadow={false}
+              drawShadow={true}
+              maxShadowOpacity={0.15}
               flippingTime={isMobile ? 600 : 800}
               swipeDistance={isMobile ? 25 : 30}
               showPageCorners={false}
               useMouseEvents={true}
+              pageSpacing={2}
               mobileScrollSupport
               clickEventForward={false}
               style={{ 
