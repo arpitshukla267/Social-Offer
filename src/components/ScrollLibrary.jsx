@@ -41,21 +41,30 @@ const BOOK_PAGES_2 = [
 ];
 
 const BOOK_PAGES_3 = [
-  "/Book3/1st.jpeg", // cover
-  "/Book3/2nd.jpeg", // back of cover
-  "/Book3/3rd.jpeg",
-  "/Book3/4th.jpeg",
-  "/Book3/5th.jpeg",
-  "/Book3/6th.jpeg",
-  "/Book3/8th.jpeg",
-  "/Book3/9th.jpeg",
-  "/Book3/10th.jpeg",
-  "/Book3/11th.jpeg",
-  "/Book3/12th.jpeg",
-  "/Book3/13th.jpeg",
-  "/Book3/14th.jpeg",
-  "/Book3/15th.jpeg",
-  "/Book3/16th.jpeg",
+  "/Book3/1.png", // cover
+  "/Book3/2.png", // back of cover
+  "/Book3/3.png",
+  "/Book3/4.png",
+  "/Book3/5.png",
+  "/Book3/6.png",
+  "/Book3/8.png",
+  "/Book3/9.png",
+  "/Book3/10.png",
+  "/Book3/11.png",
+  "/Book3/12.png",
+  "/Book3/13.png",
+  "/Book3/14.png",
+  "/Book3/15.png",
+  "/Book3/16.png",
+  "/Book3/17.png",
+  "/Book3/18.png",
+  "/Book3/19.png",
+  "/Book3/20.png",
+  "/Book3/21.png",
+  "/Book3/22.png",
+  "/Book3/23.png",
+  "/Book3/24.png",
+  "/Book3/25.png",
 ];
 
 const BOOK_PAGES_4 = [
@@ -128,6 +137,45 @@ const BOOK_PAGES_7 = [
   "/Book7/12.png",
 ];
 
+const BOOK_PAGES_8 = [
+  "/Book8/1.png", // cover
+  "/Book8/2.png", // back of cover
+  "/Book8/3.png",
+  "/Book8/4.png",
+  "/Book8/5.png",
+  "/Book8/6.png",
+  "/Book8/8.png",
+  "/Book8/9.png",
+  "/Book8/10.png",
+  "/Book8/11.png",
+  "/Book8/12.png",
+  "/Book8/13.png",
+  "/Book8/14.png",
+];
+
+const BOOK_PAGES_9 = [
+  "/Book9/1.png", // cover
+  "/Book9/2.png", // back of cover
+  "/Book9/3.png",
+  "/Book9/4.png",
+  "/Book9/5.png",
+  "/Book9/6.png",
+  "/Book9/8.png",
+  "/Book9/9.png",
+  "/Book9/10.png",
+  "/Book9/11.png",
+  "/Book9/12.png",
+  "/Book9/13.png",
+  "/Book9/14.png",
+  "/Book9/15.png",
+  "/Book9/16.png",
+  "/Book9/17.png",
+  "/Book9/18.png",
+  "/Book9/19.png",
+  "/Book9/20.png",
+];
+
+
 const BOOKS = [
   {
     id: 1,
@@ -145,9 +193,9 @@ const BOOKS = [
   },
   {
     id: 3,
-    title: "Swasth Bharat Healthcare",
+    title: "Himvarsha Foods",
     category: "Brand Strategy",
-    cover: "/Book3/1st.jpeg",
+    cover: "/Book3/1.png",
     pages: BOOK_PAGES_3,
   },
   {
@@ -177,6 +225,20 @@ const BOOKS = [
     category: "Brand Strategy",
     cover: "/Book7/1.png",
     pages: BOOK_PAGES_7,
+  },
+  {
+    id: 8,
+    title: "BBBPL",
+    category: "Brand Strategy",
+    cover: "/Book8/1.png",
+    pages: BOOK_PAGES_8,
+  },
+  {
+    id: 9,
+    title: "Blue Horse Elevator",
+    category: "Digital Production",
+    cover: "/Book9/1.png",
+    pages: BOOK_PAGES_9,
   },
 ];
 
@@ -265,6 +327,107 @@ function BookReelItem({
   const pageFlipReady = useRef(false);
   const isMountedRef = useRef(true);
   const timeoutRefs = useRef([]);
+  const audioRef = useRef(null);
+  const audioReadyRef = useRef(false);
+  const imagesLoadedRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const isAutomaticFlipRef = useRef(false);
+  const automaticFlipCountRef = useRef(0);
+
+  // Preload all images for this book
+  const preloadBookImages = async () => {
+    if (imagesLoadedRef.current) return;
+    
+    setIsLoading(true);
+    const imagePromises = book.pages.map((pagePath) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve; // Resolve even on error to not block
+        img.src = pagePath;
+      });
+    });
+
+    try {
+      await Promise.all(imagePromises);
+      imagesLoadedRef.current = true;
+      setIsLoading(false);
+    } catch (error) {
+      imagesLoadedRef.current = true;
+      setIsLoading(false);
+    }
+  };
+
+  // Preload audio when book starts loading
+  useEffect(() => {
+    if (!isSelectedBook) return;
+    
+    try {
+      audioRef.current = new Audio(
+        "https://www.soundjay.com/misc/sounds/page-flip-01a.mp3"
+      );
+      audioRef.current.volume = 0.2;
+      audioRef.current.preload = 'auto';
+      
+      const handleCanPlay = () => {
+        audioReadyRef.current = true;
+      };
+      
+      const handleError = () => {
+        audioReadyRef.current = false;
+      };
+      
+      audioRef.current.addEventListener('canplaythrough', handleCanPlay);
+      audioRef.current.addEventListener('error', handleError);
+      audioRef.current.load();
+      
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('canplaythrough', handleCanPlay);
+          audioRef.current.removeEventListener('error', handleError);
+        }
+      };
+    } catch (error) {
+      audioReadyRef.current = false;
+    }
+  }, [isSelectedBook]);
+
+  // Preload book images when selected
+  useEffect(() => {
+    if (isSelectedBook && shouldLoad) {
+      preloadBookImages();
+    }
+  }, [isSelectedBook, shouldLoad]);
+
+  // Save opened book to localStorage
+  useEffect(() => {
+    if (isSelectedBook && !isLoading && imagesLoadedRef.current) {
+      try {
+        const openedBooks = JSON.parse(localStorage.getItem('openedBooks') || '[]');
+        if (!openedBooks.includes(book.id)) {
+          openedBooks.push(book.id);
+          localStorage.setItem('openedBooks', JSON.stringify(openedBooks));
+        }
+      } catch (error) {
+        // Silently handle localStorage errors
+      }
+    }
+  }, [isSelectedBook, isLoading, book.id]);
+
+  // Preload next book when current book is loaded
+  useEffect(() => {
+    if (isSelectedBook && !isLoading && imagesLoadedRef.current) {
+      const nextBookIndex = BOOKS.findIndex(b => b.id === book.id) + 1;
+      if (nextBookIndex < BOOKS.length) {
+        const nextBook = BOOKS[nextBookIndex];
+        // Preload next book images in background
+        nextBook.pages.forEach((pagePath) => {
+          const img = new Image();
+          img.src = pagePath;
+        });
+      }
+    }
+  }, [isSelectedBook, isLoading, book.id]);
 
   // Cleanup function
   useEffect(() => {
@@ -292,8 +455,89 @@ function BookReelItem({
     };
   }, []);
 
+  // Reliable audio playback function
+  const playFlipSound = (pageIndex) => {
+    if (!isMountedRef.current) return;
+    
+    try {
+      let audio = null;
+      
+      // Try to use preloaded audio if ready
+      if (audioReadyRef.current && audioRef.current) {
+        // Clone the audio to allow overlapping sounds
+        audio = audioRef.current.cloneNode();
+        audio.volume = pageIndex === 0 ? 0.3 : 0.2;
+      } else {
+        // Fallback: create new audio instance
+        audio = new Audio(
+          "https://www.soundjay.com/misc/sounds/page-flip-01a.mp3"
+        );
+        audio.volume = pageIndex === 0 ? 0.3 : 0.2;
+        audio.preload = 'auto';
+      }
+      
+      // Reset to start and play
+      audio.currentTime = 0;
+      
+      // Ensure audio is ready before playing
+      const playAudio = () => {
+        if (!isMountedRef.current) return;
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            // If play fails, try loading and playing again
+            if (audio.readyState === 0) {
+              audio.load();
+              audio.addEventListener('canplaythrough', () => {
+                if (isMountedRef.current) {
+                  audio.currentTime = 0;
+                  audio.play().catch(() => {});
+                }
+              }, { once: true });
+            }
+          });
+        }
+      };
+      
+      // If audio is already ready, play immediately
+      if (audio.readyState >= 2) {
+        playAudio();
+      } else {
+        // Wait for audio to be ready
+        audio.addEventListener('canplaythrough', playAudio, { once: true });
+        audio.addEventListener('error', () => {
+          // Silently handle errors
+        }, { once: true });
+        // Try to load if not already loading
+        if (audio.readyState === 0) {
+          audio.load();
+        }
+      }
+    } catch (error) {
+      // Silently handle audio errors
+    }
+  };
+
   // Wait for pageFlip to be ready before triggering animation
   const handleInit = () => {
+    if (!isMountedRef.current) return;
+    
+    // Wait for images to load before initializing
+    if (isSelectedBook && isLoading) {
+      const checkImages = setInterval(() => {
+        if (!isLoading && imagesLoadedRef.current) {
+          clearInterval(checkImages);
+          initializeBook();
+        }
+      }, 100);
+      timeoutRefs.current.push(checkImages);
+      return;
+    }
+    
+    initializeBook();
+  };
+
+  const initializeBook = () => {
     if (!isMountedRef.current) return;
     
     try {
@@ -302,7 +546,7 @@ function BookReelItem({
       
       // For the selected book (first book), trigger flip animation after initialization
       // Works for both desktop and mobile
-      if (isSelectedBook && !hasFlippedInitially.current) {
+      if (isSelectedBook && !hasFlippedInitially.current && !isLoading) {
         const delay = isMobile ? 1200 : 900;
         const timeout1 = setTimeout(() => {
           if (!isMountedRef.current || !flipBookRef.current) return;
@@ -318,19 +562,32 @@ function BookReelItem({
                   // Check if pageFlip is still valid
                   const currentPageFlip = flipBookRef.current?.pageFlip?.();
                   if (currentPageFlip && typeof currentPageFlip.flip === 'function' && isMountedRef.current) {
-                    // Flip to page 1
+                    // Reset counter for automatic flips
+                    automaticFlipCountRef.current = 0;
+                    isAutomaticFlipRef.current = true;
+                    
+                    // Flip to page 1 - onFlip will be called and will play sound (count = 0, so it plays)
                     currentPageFlip.flip(1, "top");
+                    
                     // Hold for 1.2 seconds
                     const timeout2 = setTimeout(() => {
                       if (!isMountedRef.current || !flipBookRef.current) return;
                       try {
                         const finalPageFlip = flipBookRef.current?.pageFlip?.();
                         if (finalPageFlip && typeof finalPageFlip.flip === 'function' && isMountedRef.current) {
-                          // Flip back to cover
+                          // Flip back to cover - onFlip will be called and will play sound (count = 1, so it plays)
                           finalPageFlip.flip(0, "top");
+                          
+                          // Reset flag after both automatic flips are complete
+                          setTimeout(() => {
+                            isAutomaticFlipRef.current = false;
+                            automaticFlipCountRef.current = 0;
+                          }, 800);
                         }
                       } catch (error) {
                         // Silently handle error - prevent removeChild errors
+                        isAutomaticFlipRef.current = false;
+                        automaticFlipCountRef.current = 0;
                       }
                     }, 1200);
                     timeoutRefs.current.push(timeout2);
@@ -389,6 +646,7 @@ function BookReelItem({
                         const currentPageFlip = flipBookRef.current?.pageFlip?.();
                         if (currentPageFlip && typeof currentPageFlip.flip === 'function' && isMountedRef.current) {
                           // Flip to page 1
+                          isAutomaticFlipRef.current = true;
                           currentPageFlip.flip(1, "top");
                           // Hold for 1.2 seconds
                           const timeout2 = setTimeout(() => {
@@ -397,10 +655,16 @@ function BookReelItem({
                               const finalPageFlip = flipBookRef.current?.pageFlip?.();
                               if (finalPageFlip && typeof finalPageFlip.flip === 'function' && isMountedRef.current) {
                                 // Flip back to cover
+                                isAutomaticFlipRef.current = true;
                                 finalPageFlip.flip(0, "top");
+                                // Reset flag after a short delay
+                                setTimeout(() => {
+                                  isAutomaticFlipRef.current = false;
+                                }, 100);
                               }
                             } catch (error) {
                               // Silently handle error - prevent removeChild errors
+                              isAutomaticFlipRef.current = false;
                             }
                           }, 1200);
                           timeoutRefs.current.push(timeout2);
@@ -453,15 +717,21 @@ function BookReelItem({
       });
     }
 
+    // Play flip sound
+    // For automatic flips on selected book, we want exactly 2 sounds (one for each flip)
+    // For manual flips, play sound normally
     if (pageIndex !== undefined && isMountedRef.current) {
-      try {
-        const audio = new Audio(
-          "https://www.soundjay.com/misc/sounds/page-flip-01a.mp3"
-        );
-        audio.volume = pageIndex === 0 ? 0.3 : 0.2;
-        audio.play().catch(() => {});
-      } catch (error) {
-        // Silently handle audio errors
+      if (isAutomaticFlipRef.current && isSelectedBook) {
+        // This is an automatic flip on the selected book
+        // Only play sound for the first 2 automatic flips (count 0 and 1)
+        if (automaticFlipCountRef.current < 2) {
+          playFlipSound(pageIndex);
+          automaticFlipCountRef.current++;
+        }
+        // After 2 sounds, don't play any more for automatic flips
+      } else {
+        // Normal flip (manual or not selected book) - always play sound
+        playFlipSound(pageIndex);
       }
     }
 
@@ -504,10 +774,10 @@ function BookReelItem({
           WebkitBackfaceVisibility: "hidden"
         }}
       >
-        <h2 className={`${isMobile ? 'text-lg' : 'text-2xl md:text-3xl'} font-black ${isMobile ? 'text-nowrap' : 'text-nowrap'} uppercase tracking-tighter text-zinc-900 text-center`}>
+        <h2 className={`${isMobile ? 'text-2xl' : 'text-2xl md:text-3xl'} font-semibold ${isMobile ? 'text-nowrap' : 'text-nowrap'} uppercase tracking-tighter text-zinc-900 text-center`}>
           {book.title}
         </h2>
-        <div className="h-1 bg-red-600 mt-2 mx-auto" style={{ width: isMobile ? '80%' : '100%' }} />
+        <div className="h-1 bg-red-600 md:mt-2 mx-auto" style={{ width: isMobile ? '80%' : '100%' }} />
       </motion.div>
 
       <div className={`relative w-full ${isMobile ? 'h-[85vh] mt-16' : 'h-[70vh] mt-24'} flex justify-center items-center`}>
@@ -594,8 +864,8 @@ function BookReelItem({
             <HTMLFlipBook
               ref={flipBookRef}
               onInit={handleInit}
-              width={Math.min(windowDims.width - 20, 400)}
-              height={Math.min((windowDims.width - 20) * 1.4, 560)}
+              width={400}
+              height={ 560}
               size="fixed"
               showCover={false}
               usePortrait={true}
@@ -664,13 +934,15 @@ function LibraryContent() {
     update();
     window.addEventListener("resize", update);
 
-    const timer = setTimeout(() => setIsBookReady(true), 800);
-
     return () => {
       window.removeEventListener("resize", update);
-      clearTimeout(timer);
     };
   }, []);
+
+  // Set callback for when book is ready
+  const handleBookReady = () => {
+    setIsBookReady(true);
+  };
 
   useEffect(() => {
     if (mounted && isBookReady) {
@@ -711,7 +983,7 @@ function LibraryContent() {
                 className="h-1 bg-red-600 mt-2"
               />
               <div className="text-[10px] font-mono text-zinc-400 mt-4 tracking-[0.4em] uppercase text-center animate-pulse">
-                Opening Selected Archive...
+                Loading Archive...
               </div>
             </div>
           </motion.div>
@@ -730,7 +1002,12 @@ function LibraryContent() {
             isSelectedBook={idx === 0}
             onInit={
               idx === 0
-                ? () => setTimeout(() => setIsBookReady(true), 500)
+                ? () => {
+                    // Wait a bit for the book to fully initialize
+                    setTimeout(() => {
+                      handleBookReady();
+                    }, 500);
+                  }
                 : undefined
             }
           />

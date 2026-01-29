@@ -18,9 +18,12 @@ const BOOK_PAGES_2 = [
 ];
 
 const BOOK_PAGES_3 = [
-  "/Book3/1st.jpeg", "/Book3/2nd.jpeg", "/Book3/3rd.jpeg", "/Book3/4th.jpeg",
-  "/Book3/5th.jpeg", "/Book3/6th.jpeg", "/Book3/8th.jpeg", "/Book3/9th.jpeg",
-  "/Book3/10th.jpeg", "/Book3/11th.jpeg"
+  "/Book3/1.png", "/Book3/2.png", "/Book3/3.png", "/Book3/4.png",
+  "/Book3/5.png", "/Book3/6.png", "/Book3/8.png", "/Book3/9.png",
+  "/Book3/10.png", "/Book3/11.png", "/Book3/12.png", "/Book3/13.png",
+  "/Book3/14.png", "/Book3/15.png", "/Book3/16.png", "/Book3/17.png",
+  "/Book3/18.png", "/Book3/19.png", "/Book3/20.png", "/Book3/21.png",
+  "/Book3/22.png", "/Book3/23.png", "/Book3/24.png", "/Book3/25.png",
 ];
 
 const BOOK_PAGES_4 = [
@@ -49,6 +52,21 @@ const BOOK_PAGES_7 = [
   "/Book7/10.png", "/Book7/11.png", "/Book7/12.png"
 ];
 
+const BOOK_PAGES_8 = [
+  "/Book8/1.png", "/Book8/2.png", "/Book8/3.png", "/Book8/4.png",
+  "/Book8/5.png", "/Book8/6.png", "/Book8/8.png", "/Book8/9.png",
+  "/Book8/10.png", "/Book8/11.png", "/Book8/12.png", "/Book8/13.png",
+  "/Book8/14.png"
+];
+
+const BOOK_PAGES_9 = [
+  "/Book9/1.png", "/Book9/2.png", "/Book9/3.png", "/Book9/4.png",
+  "/Book9/5.png", "/Book9/6.png", "/Book9/8.png", "/Book9/9.png",
+  "/Book9/10.png", "/Book9/11.png", "/Book9/12.png", "/Book9/13.png",
+  "/Book9/14.png", "/Book9/15.png", "/Book9/16.png", "/Book9/17.png",
+  "/Book9/18.png", "/Book9/19.png", "/Book9/20.png"
+];
+
 const BOOKS = [
   {
     id: 1,
@@ -66,9 +84,9 @@ const BOOKS = [
   },
   {
     id: 3,
-    title: "Swasth Bharat Healthcare",
+    title: "Himvarsha Foods",
     category: "Brand Strategy",
-    cover: "/Book3/1st.jpeg",
+    cover: "/Book3/1.png",
     pages: BOOK_PAGES_3,
   },
   {
@@ -99,12 +117,51 @@ const BOOKS = [
     cover: "/Book7/1.png",
     pages: BOOK_PAGES_7,
   },
+  {
+    id: 8,
+    title: "BBBPL",
+    category: "Brand Strategy",
+    cover: "/Book8/1.png",
+    pages: BOOK_PAGES_8,
+  },
+  {
+    id: 9,
+    title: "Blue Horse Elevator",
+    category: "Digital Production",
+    cover: "/Book9/1.png",
+    pages: BOOK_PAGES_9,
+  },
 ];
 
 const BooksHero = () => {
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
+  const [coversLoaded, setCoversLoaded] = useState(false);
+
+  // Preload all cover images when component mounts
+  useEffect(() => {
+    const preloadCovers = async () => {
+      const coverPromises = BOOKS.map((book) => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = resolve;
+          img.onerror = resolve; // Resolve even on error to not block
+          img.src = book.cover;
+        });
+      });
+
+      try {
+        await Promise.all(coverPromises);
+        setCoversLoaded(true);
+      } catch (error) {
+        // Silently handle errors
+        setCoversLoaded(true);
+      }
+    };
+
+    preloadCovers();
+  }, []);
 
   const handleBookClick = (bookId) => {
     setIsExiting(true);
