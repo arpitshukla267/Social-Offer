@@ -829,7 +829,7 @@ function BookReelItem({
               delay: 0.15,
               ease: [0.25, 0.46, 0.45, 0.94] // Custom easing for smoother animation
             }}
-            className="w-[90%] flex justify-center items-center"
+            className="w-[80%] flex justify-center items-center"
             style={{ 
               willChange: "transform, opacity",
               backfaceVisibility: "hidden",
@@ -839,7 +839,7 @@ function BookReelItem({
             <HTMLFlipBook
               ref={flipBookRef}
               onInit={handleInit}
-              width={450}
+              width={350}
               height={500}              
               size="fixed"
               showCover={false}
